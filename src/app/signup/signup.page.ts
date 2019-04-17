@@ -26,9 +26,15 @@ export class SignupPage implements OnInit {
   signup() {
     console.log(this.name + ' ' + this.email + ' ' + this.password);
     var value = { "email": this.email, "password": this.password };
+    var photoURL = "";
     this.authService.registerUser(value).then(
       (user) => {
         console.log(user)
+        this.authService.updateUser(user,this.name, photoURL).then(
+          (res) => {
+            console.log('Profile Updated');
+          })
+
       }).catch((err) => {
         console.log(err)
       })
