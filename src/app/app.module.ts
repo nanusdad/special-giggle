@@ -11,16 +11,14 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { AuthenticationService } from './services/authentication.service';
 import { AngularFireAuthModule } from '@angular/fire/auth';
- 
-import * as firebase from 'firebase';
 
-
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule,
-    AngularFireAuthModule
+    AngularFireAuthModule, ReactiveFormsModule
   ],
   providers: [
     StatusBar,
@@ -30,4 +28,4 @@ import * as firebase from 'firebase';
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule { }
