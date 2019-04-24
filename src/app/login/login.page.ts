@@ -4,7 +4,6 @@ import { NavController, ToastController } from '@ionic/angular';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
 import { AuthenticationService } from '../services/authentication.service';
-import { async } from '@angular/core/testing';
 
 
 @Component({
@@ -56,6 +55,8 @@ export class LoginPage implements OnInit {
           console.log(toastData);
           toastData.present();
         });
+
+        this.navCtrl.navigateRoot('/feed');
 
       }).catch((err) => {
         console.log(err);

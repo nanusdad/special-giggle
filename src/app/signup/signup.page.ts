@@ -27,6 +27,10 @@ export class SignupPage implements OnInit {
     this.navCtrl.navigateBack('/home');
   }
 
+  gotoFeed() {
+    this.navCtrl.navigateBack('/feed');
+  }
+
   signup() {
     console.log(this.name + ' ' + this.email + ' ' + this.password);
     var value = { "email": this.email, "password": this.password };
@@ -43,7 +47,6 @@ export class SignupPage implements OnInit {
           toastData.present();
         });
 
-
         this.authService.updateUser(user, this.name, photoURL).then(
           (res) => {
             console.log('Profile Updated');
@@ -55,13 +58,14 @@ export class SignupPage implements OnInit {
                   text: 'OK',
                   handler: () => {
                     //Navigate to the feeds page
-                    console.log('Navigate to feed page')
+                    console.log('Navigate to feed page');
+                    this.gotoFeed();
                   }
                 }
               ]
             }).then((alertData) => {
-                console.log(alertData);
-                alertData.present();
+              console.log(alertData);
+              alertData.present();
             });
           })
 
