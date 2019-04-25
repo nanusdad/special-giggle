@@ -48,7 +48,7 @@ export class DatastorageService {
     }
   }
 
-  datastoreSnapshot(collectionName: string, orderByField: string, orderByDirection: any, limitSize: number, startAfter: any) {
+  datastoreSnapshot(collectionName: string, orderByField: string, orderByDirection: any, limitSize: number, startAfter?: any) {
 
     if (startAfter != null) {
       return firebase.firestore().collection(collectionName).orderBy(orderByField, orderByDirection).startAfter(startAfter).limit(limitSize);

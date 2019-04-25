@@ -13,3 +13,13 @@ v10.14.1
 cordova --version
 8.0.0
 ```
+
+### Camera plugin ###
+
+* [Documentation](https://ionicframework.com/docs/native/camera)
+
+```shell
+ionic cordova plugin add cordova-plugin-camera
+npm install @ionic-native/camera
+```
+

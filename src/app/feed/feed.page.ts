@@ -9,6 +9,7 @@ import * as moment from 'moment';
 import { EventEmitter } from 'events';
 import { ChangeDetectionStrategy } from '@angular/compiler/src/core';
 import { LoadingService } from '../services/loading.service';
+import { AuthenticationService } from '../services/authentication.service';
 
 @Component({
   selector: 'app-feed',
@@ -28,7 +29,8 @@ export class FeedPage implements OnInit {
     private datastorageService: DatastorageService,
     public navCtrl: NavController,
     private toastCtrl: ToastController,
-    private loadingCtrl: LoadingService
+    private loadingCtrl: LoadingService,
+    private authService: AuthenticationService,
   ) {
 
     this.getPosts();
@@ -46,7 +48,7 @@ export class FeedPage implements OnInit {
     this.loadingCtrl.present();
 
 
-    let query = this.datastorageService.datastoreSnapshot("posts", "created", 'desc', this.pageSize, null);
+    let query = this.datastorageService.datastoreSnapshot("posts", "created", 'desc', this.pageSize, undefined);
 
     query.onSnapshot((snapshot) => {
       console.log("Changed");
@@ -155,6 +157,8 @@ export class FeedPage implements OnInit {
       .then((doc) => {
         console.log(doc);
 
+        this.postText = "";
+
         this.toastCtrl.create({
           message: "Posted successfully!",
           duration: 3000
@@ -194,11 +198,42 @@ export class FeedPage implements OnInit {
   }
 
   toggleInfiniteScroll() {
-    if (this.infiniteScroll) {
-      this.infiniteScroll.disabled = !this.infiniteScroll.disabled;
-    }
+
+    this.infiniteScroll.disabled = !this.infiniteScroll.disabled;
+
   }
 
+
+  logout() {
+
+    console.log("Calling logout function");
+
+    this.authService.logoutUser().then(
+      () => {
+
+        this.toastCtrl.create({
+          message: "Bye! Logged out successfully.",
+          duration: 3000
+        }).then((toastData) => {
+          console.log(toastData);
+          toastData.present();
+        });
+
+        this.navCtrl.navigateRoot('/home');
+
+      }).catch((err) => {
+        console.log(err);
+
+        this.toastCtrl.create({
+          message: err.message,
+          duration: 3000
+        }).then((toastData) => {
+          console.log(toastData);
+          toastData.present();
+        });
+
+      })
+  }
 
 
 }
