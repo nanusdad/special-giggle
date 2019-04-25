@@ -1,8 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { NavController, ToastController } from '@ionic/angular';
+import { Component, OnInit, ViewChild } from '@angular/core';
+
+
+import { NavController, ToastController, IonInfiniteScroll } from '@ionic/angular';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { DatastorageService } from '../services/datastorage.service';
+import * as moment from 'moment';
+import { EventEmitter } from 'events';
+import { ChangeDetectionStrategy } from '@angular/compiler/src/core';
+import { LoadingService } from '../services/loading.service';
 
 @Component({
   selector: 'app-feed',
@@ -11,13 +17,18 @@ import { DatastorageService } from '../services/datastorage.service';
 })
 export class FeedPage implements OnInit {
 
+  @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
+
   postText: string = "";
   posts: any[] = [];
+  pageSize: number = 5;
+  cursor: any;
 
   constructor(
     private datastorageService: DatastorageService,
     public navCtrl: NavController,
-    public toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private loadingCtrl: LoadingService
   ) {
 
     this.getPosts();
@@ -31,11 +42,44 @@ export class FeedPage implements OnInit {
 
     this.posts = [];
 
-    this.datastorageService.datastoreGet("posts")
+
+    this.loadingCtrl.present();
+
+
+    let query = this.datastorageService.datastoreSnapshot("posts", "created", 'desc', this.pageSize, null);
+
+    query.onSnapshot((snapshot) => {
+      console.log("Changed");
+      let changedDocs = snapshot.docChanges();
+      changedDocs.forEach((change) => {
+        if (change.type == "added") {
+          // TODO
+          console.log("Document with id " + change.doc.id + " has been " + change.type);
+        }
+
+        if (change.type == "modified") {
+          // TODO
+          console.log("Document with id " + change.doc.id + " has been " + change.type);
+        }
+
+        if (change.type == "removed") {
+          // TODO
+          console.log("Document with id " + change.doc.id + " has been " + change.type);
+        }
+
+      })
+    })
+
+    query.get()
       .then((docs) => {
         docs.forEach((doc) => {
           this.posts.push(doc);
         })
+
+        this.loadingCtrl.dismiss();
+
+        this.cursor = this.posts[this.posts.length - 1];
+        console.log(this.cursor);
 
         console.log(this.posts);
 
@@ -45,7 +89,7 @@ export class FeedPage implements OnInit {
         this.toastCtrl.create({
           message: err.message,
           duration: 3000
-        }).then((toastData)=>{
+        }).then((toastData) => {
           console.log(toastData);
           toastData.present();
         });
@@ -54,7 +98,52 @@ export class FeedPage implements OnInit {
       })
 
   }
-  post() {
+
+  loadMorePosts(event) {
+
+    this.datastorageService.datastoreGet("posts", "created", 'desc', this.pageSize, this.cursor)
+      .then((docs) => {
+        docs.forEach((doc) => {
+          this.posts.push(doc);
+        })
+
+        console.log(this.posts);
+
+        if (docs.size < this.pageSize) {
+          // all documents have been loaded
+          event.target.disabled = true;
+        } else {
+          event.target.complete();
+          this.cursor = this.posts[this.posts.length - 1];
+
+        }
+
+      }).catch((err) => {
+        console.log(err);
+
+        this.toastCtrl.create({
+          message: err.message,
+          duration: 3000
+        }).then((toastData) => {
+          console.log(toastData);
+          toastData.present();
+        });
+
+        this.navCtrl.navigateBack('/home');
+      })
+
+
+  }
+
+  doRefresh(event) {
+    this.posts = [];
+    this.getPosts();
+    this.toggleInfiniteScroll();
+    event.target.complete();
+  }
+
+  post(event) {
+
     var rec = {
       postText: this.postText,
       created: firebase.firestore.FieldValue.serverTimestamp(),
@@ -65,7 +154,18 @@ export class FeedPage implements OnInit {
     this.datastorageService.datastoreAdd("posts", rec)
       .then((doc) => {
         console.log(doc);
+
+        this.toastCtrl.create({
+          message: "Posted successfully!",
+          duration: 3000
+        }).then((toastData) => {
+          console.log(toastData);
+          toastData.present();
+        });
+
         this.getPosts();
+        this.toggleInfiniteScroll();
+
       }).catch((err) => {
         console.log(err);
       })
@@ -80,10 +180,25 @@ export class FeedPage implements OnInit {
       .then((doc) => {
         console.log(doc);
         this.getPosts();
+        this.toggleInfiniteScroll();
+        // TODO - deleting first without Infinite Scrolling disable it
       }).catch((err) => {
         console.log(err);
       })
 
   }
+
+  ago(time) {
+    let difference = moment(time).diff(moment());
+    return moment.duration(difference).humanize();
+  }
+
+  toggleInfiniteScroll() {
+    if (this.infiniteScroll) {
+      this.infiniteScroll.disabled = !this.infiniteScroll.disabled;
+    }
+  }
+
+
 
 }

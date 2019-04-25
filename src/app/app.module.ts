@@ -15,6 +15,7 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { DatastorageService } from './services/datastorage.service';
+import { LoadingService } from './services/loading.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -27,6 +28,7 @@ import { DatastorageService } from './services/datastorage.service';
     SplashScreen,
     AuthenticationService,
     DatastorageService,
+    LoadingService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

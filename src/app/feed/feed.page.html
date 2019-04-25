@@ -14,9 +14,13 @@
     <ion-row class="rowStyle">
       <ion-icon name="images" size="large"></ion-icon>
       <ion-input type="text" color="danger" placeholder="Say something..." [(ngModel)]="postText"></ion-input>
-      <ion-icon name="send" size="large" (click)="post()"></ion-icon>
+      <ion-icon name="send" size="large" (click)="post($event)"></ion-icon>
     </ion-row>
   </ion-grid>
+
+  <ion-refresher (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
   <ion-card *ngFor="let post of posts">
     <ion-card-header color="danger">
       {{ post.data().owner_name }} Says
@@ -29,20 +33,24 @@
       {{ post.data().postText }}
     </ion-card-content>
     <ion-grid class="bottom-bar">
-      <ion-row class="bottom-bar">
-        <ion-col>
+      <ion-row>
+        <ion-col expand="block">
           <ion-icon name="thumbs-up"></ion-icon>
           <small>12 Likes</small>
         </ion-col>
-        <ion-col>
+        <ion-col expand="block">
           <ion-icon name="text"></ion-icon>
           <small>12 Comments</small>
         </ion-col>
-        <ion-col>
+        <ion-col expand="block">
           <ion-icon name="clock"></ion-icon>
-          <small>12 mins ago</small>
+          <small>{{ ago(post.data().created.toDate()) }} ago</small>
         </ion-col>
       </ion-row>
     </ion-grid>
   </ion-card>
+
+  <ion-infinite-scroll (ionInfinite)="loadMorePosts($event)">
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>
