@@ -25,3 +25,19 @@ npm install --save @ionic-native/camera
 
 * [iOS Quirks](https://github.com/apache/cordova-plugin-camera#ios-quirks)
 
+### Quickstart - Ionic 4 App ###
+* Create new app
+```shell
+ionic start <app_name> blank
+```
+* Generate new pages
+```shell
+ionic generate page login
+ionic generate page signup
+```
+* Generate new services
+```
+ionic g service services/authentication
+ionic g service services/datastorage
+```
+
