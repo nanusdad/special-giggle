@@ -17,6 +17,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { DatastorageService } from './services/datastorage.service';
 import { LoadingService } from './services/loading.service';
 
+import { Camera } from '@ionic-native/camera/ngx';
+
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
@@ -29,6 +31,7 @@ import { LoadingService } from './services/loading.service';
     AuthenticationService,
     DatastorageService,
     LoadingService,
+    Camera,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

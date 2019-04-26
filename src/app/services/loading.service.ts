@@ -10,9 +10,10 @@ export class LoadingService {
 
   constructor(public loadingController: LoadingController) { }
 
-  async present() {
+  async present(message?: string) {
     this.isLoading = true;
     return await this.loadingController.create({
+      message: message,
       duration: 5000,
     }).then(a => {
       a.present().then(() => {
@@ -28,4 +29,6 @@ export class LoadingService {
     this.isLoading = false;
     return await this.loadingController.dismiss().then(() => console.log('dismissed'));
   }
+
+  
 }

@@ -12,11 +12,17 @@
 <ion-content>
   <ion-grid>
     <ion-row class="rowStyle">
-      <ion-icon name="images" size="large"></ion-icon>
+      <ion-icon name="images" size="large" (click)="addPhoto()"></ion-icon>
       <ion-input type="text" color="danger" placeholder="Say something..." [(ngModel)]="postText"></ion-input>
       <ion-icon name="send" size="large" (click)="post($event)"></ion-icon>
     </ion-row>
+    <ion-row class="rowStyle" *ngIf="image">
+      <ion-card class="round-corners">
+        <img [src]="image" class="round-corners">
+      </ion-card>
+    </ion-row>
   </ion-grid>
+
 
   <ion-refresher (ionRefresh)="doRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
@@ -31,6 +37,7 @@
     </ion-card-subtitle> -->
     <ion-card-content lines="full" text-wrap>
       {{ post.data().postText }}
+      <img [src]="post.data().image" *ngIf="post.data().image">
     </ion-card-content>
     <ion-grid class="bottom-bar">
       <ion-row>

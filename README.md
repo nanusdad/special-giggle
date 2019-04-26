@@ -20,6 +20,8 @@ cordova --version
 
 ```shell
 ionic cordova plugin add cordova-plugin-camera
-npm install @ionic-native/camera
+npm install --save @ionic-native/camera
 ```
+
+* [iOS Quirks](https://github.com/apache/cordova-plugin-camera#ios-quirks)
 

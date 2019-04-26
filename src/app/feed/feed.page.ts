@@ -4,12 +4,15 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { NavController, ToastController, IonInfiniteScroll } from '@ionic/angular';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/storage';
 import { DatastorageService } from '../services/datastorage.service';
 import * as moment from 'moment';
 import { EventEmitter } from 'events';
 import { ChangeDetectionStrategy } from '@angular/compiler/src/core';
 import { LoadingService } from '../services/loading.service';
 import { AuthenticationService } from '../services/authentication.service';
+import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
+
 
 @Component({
   selector: 'app-feed',
@@ -24,6 +27,8 @@ export class FeedPage implements OnInit {
   posts: any[] = [];
   pageSize: number = 5;
   cursor: any;
+  image: string;
+  percentage: number = 0;
 
   constructor(
     private datastorageService: DatastorageService,
@@ -31,6 +36,7 @@ export class FeedPage implements OnInit {
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingService,
     private authService: AuthenticationService,
+    private camera: Camera,
   ) {
 
     this.getPosts();
@@ -45,7 +51,7 @@ export class FeedPage implements OnInit {
     this.posts = [];
 
 
-    this.loadingCtrl.present();
+    this.loadingCtrl.present("Refreshing feed");
 
 
     let query = this.datastorageService.datastoreSnapshot("posts", "created", 'desc', this.pageSize, undefined);
@@ -154,10 +160,15 @@ export class FeedPage implements OnInit {
     };
 
     this.datastorageService.datastoreAdd("posts", rec)
-      .then((doc) => {
+      .then(async (doc) => {
         console.log(doc);
 
+        if (this.image) {
+          await this.upload(doc.id);
+        }
+
         this.postText = "";
+        this.image = undefined;
 
         this.toastCtrl.create({
           message: "Posted successfully!",
@@ -235,5 +246,73 @@ export class FeedPage implements OnInit {
       })
   }
 
+  addPhoto() {
+
+    console.log("Launching camera");
+
+    this.launchCamera();
+  }
+
+  launchCamera() {
+    const options: CameraOptions = {
+      quality: 100,
+      sourceType: this.camera.PictureSourceType.CAMERA,
+      destinationType: this.camera.DestinationType.DATA_URL,
+      encodingType: this.camera.EncodingType.PNG,
+      mediaType: this.camera.MediaType.PICTURE,
+      correctOrientation: true,
+      targetHeight: 512,
+      targetWidth: 512,
+      allowEdit: true
+    }
+
+    this.camera.getPicture(options).then((base64Image) => {
+      console.log(base64Image);
+      this.image = "data:image/png;base64," + base64Image;
+    }).catch((err) => {
+      console.log(err);
+    })
+  }
+
+  upload(name: string) {
+
+    this.percentage = 0;
+
+    return new Promise((resolve, reject) => {
+
+      this.percentage = 0
+
+      this.loadingCtrl.present("Uploading image " + this.percentage + "%");
+
+      let ref = firebase.storage().ref("postImages/" + name);
+      let uploadTask = ref.putString(this.image.split(',')[1], "base64");
+      uploadTask.on("state_changed", (taskSnapshot) => {
+        console.log(taskSnapshot);
+
+      }, (error) => {
+        console.log(error);
+      }, () => {
+        console.log("Upload has completed");
+
+        uploadTask.snapshot.ref.getDownloadURL().then((url) => {
+          console.log(url);
+          firebase.firestore().collection("posts").doc(name).update({
+            image: url
+          }).then(() => {
+            this.loadingCtrl.dismiss();
+            resolve();
+          }).catch((err) => {
+            this.loadingCtrl.dismiss();
+            reject();
+          })
+        }).catch((err) => {
+          this.loadingCtrl.dismiss();
+          reject();
+        })
+      })
+
+
+    })
+  }
 
 }
